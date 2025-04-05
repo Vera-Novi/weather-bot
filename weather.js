@@ -2,6 +2,8 @@
 require('dotenv').config(); // Load .env
 
 const TelegramBot = require('node-telegram-bot-api');
+const axios = require('axios');
+const weatherToken = process.env.WEATHER_TOKEN; // Replace with your OpenWeatherMap API key
 const token = process.env.BOT_TOKEN; // Replace with your bot token
 const bot = new TelegramBot(token, { polling: true });
 console.log('Запускаем бота...');
@@ -9,17 +11,36 @@ console.log('Запускаем бота...');
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(
     msg.chat.id,
-    'Welcome to the weather bot! Please send your location to get the weather forecast'
+    'Привет! Напишите название города, и я пришлю прогноз  погоды',
   );
 });
 
-bot.on('message', (msg) => {
-  const chatID = msg.chat.id;
-  const text = msg.text;
-  if (text.toLowerCase() != '/start') {
-    bot.sendMessage(
-      chatID,
-      'Please send your location to get the weather forecast'
-    );
+
+bot.on('message', async (msg) => {
+  const chatId = msg.chat.id;
+  const city = msg.text;
+
+  if (city.toLowerCase() === '/start') return;
+
+  try {
+    const url = `http://api.weatherapi.com/v1/current.json?key=${weatherToken}&q=${encodeURIComponent(city)}&lang=ru`;
+    const response = await axios.get(url);
+    const data = response.data;
+
+    const weather = data.current.condition.text;
+    const temp = data.current.temp_c;
+    const feelsLike = data.current.feelslike_c;
+
+    const message = `Погода в городе *${data.location.name}*:
+- ${weather}
+- 🌡 Температура: ${temp}°C
+- 🤗 Ощущается как: ${feelsLike}°C`;
+
+    bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    bot.sendMessage(chatId, '❌ Не удалось получить погоду. Убедитесь, что город указан правильно.');
   }
+
 });
