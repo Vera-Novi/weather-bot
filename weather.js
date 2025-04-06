@@ -93,7 +93,7 @@ bot.on('message', async (msg) => {
 
     const message = `
     🌍 *${data.location.name}, ${data.location.country}*
-${emoji} *${condition}*
+ *${condition}*
     Погода в городе *${data.location.name}*:
 - ${weather}
 - 🌡 Температура: ${temp}°C
