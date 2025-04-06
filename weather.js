@@ -30,6 +30,12 @@ bot.on('message', async (msg) => {
     const weather = data.current.condition.text;
     const temp = data.current.temp_c;
     const feelsLike = data.current.feelslike_c;
+    const wind = data.current.wind_kph;
+    const humidity = data.current.humidity;
+    const pressure = data.current.pressure_mb;
+    const icon = data.current.condition.icon;
+    const iconUrl = `http:${icon}`;
+    const windDirection = data.current.wind_dir;
 
     const message = `Погода в городе *${data.location.name}*:
 - ${weather}
