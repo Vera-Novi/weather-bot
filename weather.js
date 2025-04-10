@@ -91,8 +91,8 @@ bot.on('message', async (msg) => {
 `;
     });
 
-
-    bot.sendMessage(chatId, message, forecastMessage, { parse_mode: 'Markdown' });
+    const fullMessage = message + '\n' + forecastMessage;
+    bot.sendMessage(chatId, fullMessage, { parse_mode: 'Markdown' });
   } catch (error) {
     console.error(error.response?.data || error.message);
     bot.sendMessage(
@@ -101,4 +101,3 @@ bot.on('message', async (msg) => {
     );
   }
 });
-
