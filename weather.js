@@ -43,9 +43,9 @@ bot.on('message', async (msg) => {
   if (city.toLowerCase() === '/start') return;
 
   try {
-    const url = `http://api.weatherapi.com/v1/current.json?key=${weatherToken}&q=${encodeURIComponent(
+    const url = `http://api.weatherapi.com/v1/forecast.json?key=${weatherToken}&q=${encodeURIComponent(
       city
-    )}&lang=ru`;
+    )}&days=3&lang=ru`;
     const response = await axios.get(url);
     const data = response.data;
 
@@ -58,6 +58,7 @@ bot.on('message', async (msg) => {
     const icon = data.current.condition.icon;
     const iconUrl = `http:${icon}`;
     const windDirection = data.current.wind_dir;
+
 
     const message = `
     🌍 *${data.location.name}, ${data.location.country}*
@@ -73,7 +74,25 @@ bot.on('message', async (msg) => {
 Давление: *${pressure} мм рт. ст.*
 `;
 
-    bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    const forecast = data.forecast.forecastday;
+    let forecastMessage = '\n📆 Прогноз на 3 дня:\n';
+
+    forecast.forEach(day => {
+      const date = day.date;
+      const condition = day.day.condition.text;
+      const avgTemp = day.day.avgtemp_c;
+      const minTemp = day.day.mintemp_c;
+      const maxTemp = day.day.maxtemp_c;
+
+      forecastMessage += `
+📅 *${date}*:
+- ${condition}
+- 🌡 Мин: ${minTemp}°C / Макс: ${maxTemp}°C / Сред: ${avgTemp}°C
+`;
+    });
+
+
+    bot.sendMessage(chatId, message, forecastMessage, { parse_mode: 'Markdown' });
   } catch (error) {
     console.error(error.response?.data || error.message);
     bot.sendMessage(
@@ -82,3 +101,4 @@ bot.on('message', async (msg) => {
     );
   }
 });
+
